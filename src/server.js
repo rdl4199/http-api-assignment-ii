@@ -1,7 +1,6 @@
 const http = require('http')
 const url = require('url')
-
-const query = require('querystring')
+const query = require('querystring');
 
 const htmlHandler = require('./htmlResponses.js');
 const jsonHandler = require('./jsonResponses.js');

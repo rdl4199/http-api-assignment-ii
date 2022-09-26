@@ -72,25 +72,37 @@
       handleResponse(response, method === 'get')
     };
 
-    const sendPost = async (form) => {
-      const action = form.getAttribute('action');
-      const method = form.getAttribute('method');
-      const name = form.querySelector('#nameField');
-      const field = form.querySelector('#ageField');
+    //function to send post data back to our server
+    const sendPost = async (nameForm) => {
+      //Grab all the info from the form
+      const nameAction = nameForm.getAttribute('action');
+      const nameMethod = nameForm.getAttribute('method');
 
-      const data = `name=${name.value}&age=${age.value}`;
+      const nameField = nameForm.querySelector('#nameField');
+      const ageField = nameForm.querySelector('#ageField');
 
-      let response = await fetch(action, {
-        method: method,
+      //Build a data string in the FORM-URLENCODED format.
+      const formData = `name=${nameField.value}&age=${ageField.value}`;
+
+      //Make a fetch request and await a response. Set the method to
+      //the one provided by the form (POST). Set the headers. Content-Type
+      //is the type of data we are sending. Accept is the data we would like
+      //in response. Then add our FORM-URLENCODED string as the body of the request.
+      let response = await fetch(nameAction, {
+        //nameMethod will be post
+        method: nameMethod,
         headers: {
-          'Content-Type' : 'application/x-www-form-urlencoded',
-          'Accept' : 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
         },
-        body: data,
+        //body of this json object
+        body: formData,
       });
 
+      //Once we have a response, handle it.
       handleResponse(response);
     };
+
 
     const init = () => {
       const userForm = document.querySelector('#userForm');
