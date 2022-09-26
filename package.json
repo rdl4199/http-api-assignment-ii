@@ -1,0 +1,29 @@
+{
+  "name": "http-api-assignment-ii",
+  "version": "1.0.0",
+  "engines": {
+    "node": "16.14.0",
+    "npm": "8.3.1"
+  },
+  "description": "User management kind of",
+  "main": "./src/server.js",
+  "scripts": {
+    "test": "echo \"No Tests\"",
+    "start": "node ./src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rdl4199/http-api-assignment-ii.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rdl4199/http-api-assignment-ii/issues"
+  },
+  "homepage": "https://github.com/rdl4199/http-api-assignment-ii#readme",
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.26.0"
+  }
+}
