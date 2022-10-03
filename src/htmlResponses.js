@@ -2,6 +2,7 @@ const fs = require('fs');
 
 const index = fs.readFileSync(`${__dirname}/../client/client.html`);
 const css = fs.readFileSync(`${__dirname}/../client/style.css`);
+const onHandler = fs.readFileSync(`${__dirname}/../src/onloadHandler.js`);
 
 const getIndex = (request, response) => {
   response.writeHead(200, { 'Content-Type': 'text/html' });
@@ -15,7 +16,14 @@ const getCSS = (request, response) => {
   response.end();
 };
 
+const getJS = (request, response) => {
+  response.writeHead(200, { 'Content-Type': 'text/javascript' });
+  response.write(onHandler);
+  response.end();
+};
+
 module.exports = {
   getIndex,
   getCSS,
+  getJS,
 };

@@ -11,6 +11,7 @@ const urlStruct = {
     GET: {
         '/': htmlHandler.getIndex,
         '/style.css': htmlHandler.getCSS,
+        '/onloadHandler.js': htmlHandler.getJS,
         '/getUsers': jsonHandler.getUsers,
         notFound: jsonHandler.notFound,
     },
@@ -24,14 +25,14 @@ const urlStruct = {
     },
 };
 
-const onRequest = (request, response) => {
+const onRequest = (request, response, handler) => {
     const parsedURL = url.parse(request.url);
 
     const params = query.parse(parsedURL.query);
 
     if(urlStruct[request.method][parsedURL.pathname])
     {
-        urlStruct[request.method][parsedURL.pathname](request,response,params);
+        urlStruct[request.method][parsedURL.pathname](request,response,params, handler);
     }
     else
     {

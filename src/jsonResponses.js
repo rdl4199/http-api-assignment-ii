@@ -110,6 +110,7 @@ const parseBody = (request, response, handler = addUser) => {
   
       // Once we have the bodyParams object, we will call the handler function. We then
       // proceed much like we would with a GET request.
+      //Handler isnt handling so I self inserted addUSer god help
       addUser(request, response, bodyParams);
     });
   };

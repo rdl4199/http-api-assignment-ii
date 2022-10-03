@@ -3,133 +3,381 @@
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+  <!--<script src="../src/onloadHandler.js"></script>-->
+
   <script>
     const handleResponse = async (response, parseResponse) => {
-      const content = document.querySelector('#content');
+    const content = document.querySelector('#content');
 
-      switch (response.status) 
-      {
-        case 200:
-          content.innerHTML = `<b>Success</b>`;
-          break;
-        case 201:
-          content.innerHTML = `<b>Created</b>`;
-          break;
-        case 204:
-          content.innerHTML = `<b>Updated(No Content)</b>`;
-          break;
-        case 400:
-          content.innerHTML = `<b>Bad Request</b>`;
-          break;
-        case 404:
-          content.innerHTML = `<b>Resource Not Found</b>`;
-          break;
-        default:
-          content.innerHTML = `Error code not implemented by client.`;
-          break;
-      }
-
-      if(parseResponse)
-      {
-        let obj = await response.json();
-
-        let jsonString = JSON.stringify(obj);
-
-        content.innerHTML += `<p>${jsonString}</p>`;
-
-        if(obj.message)
-        {
-          content.innerHTML = `<p>${obj.id}</p>`;
-          content.innerHTML += `<p>${obj.message}</p>`;
-        }
-      }
-      else if(response.status == 201 || response.status == 204)
-      {
-        content.innerHTML += `<p>Metadata recieved</p>`;
-      }
-      else if(response.status == 400)
-      {
+    switch (response.status) 
+    {
+    case 200:
+        content.innerHTML = `<b>Success</b>`;
+        break;
+    case 201:
+        content.innerHTML = `<b>Created</b>`;
+        break;
+    case 204:
+        content.innerHTML = `<b>Updated(No Content)</b>`;
+        break;
+    case 400:
         content.innerHTML = `<b>Bad Request</b>`;
-      }
-      else
-      {
-        content.innerHTML += `<p>Meta Data Received From Head Request</p>`;
-      }
-    };
+        break;
+    case 404:
+        content.innerHTML = `<b>Resource Not Found</b>`;
+        break;
+    default:
+        content.innerHTML = `Error code not implemented by client.`;
+        break;
+    }
 
-    const requestUpdate = async (userForm) => {
-      const url = userForm.querySelector('#urlField').value;
-      const method = userForm.querySelector('#methodSelect').value;
+    if(parseResponse)
+    {
+    let obj = await response.json();
 
-      let response = await fetch(url, {
-        method, 
-        headers: {
-          'Accept': 'application/json'
-        },
-      });
+    let jsonString = JSON.stringify(obj);
 
-      handleResponse(response, method === 'get')
-    };
+    content.innerHTML += `<p>${jsonString}</p>`;
 
-    //function to send post data back to our server
-    const sendPost = async (nameForm) => {
-      //Grab all the info from the form
-      const nameAction = nameForm.getAttribute('action');
-      const nameMethod = nameForm.getAttribute('method');
+    if(obj.message)
+    {
+        content.innerHTML = `<p>${obj.id}</p>`;
+        content.innerHTML += `<p>${obj.message}</p>`;
+    }
+    }
+    else if(response.status == 201 || response.status == 204)
+    {
+    content.innerHTML += `<p>Metadata recieved</p>`;
+    }
+    else if(response.status == 400)
+    {
+    content.innerHTML = `<b>Bad Request</b>`;
+    }
+    else
+    {
+    content.innerHTML += `<p>Meta Data Received From Head Request</p>`;
+    }
+};
 
-      const nameField = nameForm.querySelector('#nameField');
-      const ageField = nameForm.querySelector('#ageField');
+const requestUpdate = async (userForm) => {
+    const url = userForm.querySelector('#urlField').value;
+    const method = userForm.querySelector('#methodSelect').value;
 
-      //Build a data string in the FORM-URLENCODED format.
-      const formData = `name=${nameField.value}&age=${ageField.value}`;
+    let response = await fetch(url, {
+    method, 
+    headers: {
+        'Accept': 'application/json'
+    },
+    });
 
-      //Make a fetch request and await a response. Set the method to
-      //the one provided by the form (POST). Set the headers. Content-Type
-      //is the type of data we are sending. Accept is the data we would like
-      //in response. Then add our FORM-URLENCODED string as the body of the request.
-      let response = await fetch(nameAction, {
-        //nameMethod will be post
-        method: nameMethod,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json',
-        },
-        //body of this json object
-        body: formData,
-      });
+    handleResponse(response, method === 'get')
+};
 
-      //Once we have a response, handle it.
-      handleResponse(response);
-    };
+//function to send post data back to our server
+const sendPost = async (nameForm) => {
+    //Grab all the info from the form
+    const nameAction = nameForm.getAttribute('action');
+    const nameMethod = nameForm.getAttribute('method');
 
+    const nameField = nameForm.querySelector('#nameField');
+    const ageField = nameForm.querySelector('#ageField');
 
-    const init = () => {
-      const userForm = document.querySelector('#userForm');
-      const nameForm = document.querySelector('#nameForm');
+    //Build a data string in the FORM-URLENCODED format.
+    const formData = `name=${nameField.value}&age=${ageField.value}`;
 
-      const getUsers = (e) => {
-        e.preventDefault();
-        requestUpdate(userForm);
-        return false;
-      }
+    //Make a fetch request and await a response. Set the method to
+    //the one provided by the form (POST). Set the headers. Content-Type
+    //is the type of data we are sending. Accept is the data we would like
+    //in response. Then add our FORM-URLENCODED string as the body of the request.
+    let response = await fetch(nameAction, {
+    //nameMethod will be post
+    method: nameMethod,
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+    },
+    //body of this json object
+    body: formData,
+    });
 
-      const addUser = (e) => {
-        e.preventDefault();
-        sendPost(nameForm);
-        return false;
-      }
+    //Once we have a response, handle it.
+    handleResponse(response);
+};
 
-      nameForm.addEventListener('submit', addUser);
+async function fmJsonFetch(searchTerm) {
+    let url = `https://ws.audioscrobbler.com/2.0/?method=album.search&album=${searchTerm}&api_key=9c9b7047bdf5b232701d0f2567bfb81a&format=json`
+    let contentString = ""
+    fetch(url)
+        .then(response => {
+          if(response.ok) {
+             // console.log(response.json());
+              return response.json();
+          }
+        })
+        .then(json => {
+          console.log(json.results.albummatches.album);
+          
+          for(let x = 0; x < json.results.albummatches.album.length; x++)
+          {
+            contentString += `<div class="searchResult" draggable="true">
+                                <div class="inner" style="background-image: url(${json.results.albummatches.album[x].image[3]['#text']}); width: 130px; height: 130px;">
+                                </div>
+                              </div>`;
+            console.log(json.results.albummatches.album[x].image[3]['#text'])
+          }
+          document.querySelector(".searchContent").innerHTML = contentString;
+        })
+    
+    console.log("Happens");
+}
 
-      userForm.addEventListener('submit', getUsers);
-    };
+const init = () => {
+    const userForm = document.querySelector('#userForm');
+    const nameForm = document.querySelector('#nameForm');
 
-    window.onload = init;
+    const getUsers = (e) => {
+    e.preventDefault();
+    requestUpdate(userForm);
+    return false;
+    }
+
+    const addUser = (e) => {
+    e.preventDefault();
+    sendPost(nameForm);
+    return false;
+    }
+
+    fmJsonFetch("believer")
+    
+    nameForm.addEventListener('submit', addUser);
+
+    userForm.addEventListener('submit', getUsers);
+};
+
+window.onload = init;
   </script>
 </head>
 <body>
-  <section id="top">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">TopChart</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Latest Charts</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class = "container pt-5">
+    <div class = "row">
+      <div class = "col-3">
+        <form class="d-flex">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
+        <div class="searchContent">
+
+        </div>
+      </div>
+      <div class = "col-7">
+        <div class = "row large">
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+        </div>
+        <div class = "row large">
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+        </div>
+        <div class = "row medium">
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+        </div>
+        <div class = "row medium">
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+        </div>
+        <div class = "row small">
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+        </div>
+        <div class = "row small">
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+          <div class="card" draggable="true">
+            <div class="inner">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class = "col-2">
+        <button class="btn btn-outline-success" type="submit">Save</button>
+        <button class="btn btn-outline-primary" type="submit">Recover</button>
+      </div>
+    </div>
+  </div>
+  <!--<section id="top">
     <h3>POST Status Code Tests</h3>
     <form id="nameForm" action="/addUser" method="post">
       <label for="name">Name: </label>
@@ -151,6 +399,6 @@
     </form>
   </section>
   <section id="content">
-  </section>
+  </section>-->
 </body>
 </html>

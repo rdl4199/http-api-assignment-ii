@@ -19,3 +19,31 @@ html, body {
   font-size: 2em;
   text-align: center;
 }
+
+.container{
+  margin: 0px !important;
+}
+
+.large .card {
+  height: 150px;
+  width: 150px;
+}
+
+.medium .card {
+  height: 125px;
+  width: 125px;
+}
+
+.small .card {
+  height: 75px;
+  width: 75px;
+}
+
+.searchResult {
+  overflow: hidden;
+}
+
+.searchResult .inner {
+  background-size: cover;
+  overflow: hidden;
+}
