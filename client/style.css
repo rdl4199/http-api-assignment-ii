@@ -24,6 +24,12 @@ html, body {
   margin: 0px !important;
 }
 
+.card {
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-color: #fff !important;
+}
+
 .large .card {
   height: 150px;
   width: 150px;
@@ -46,4 +52,13 @@ html, body {
 .searchResult .inner {
   background-size: cover;
   overflow: hidden;
+}
+
+.chart {
+  background-color: black;
+}
+
+.draggable { 
+  background-size: contain;
+  background-repeat: no-repeat;
 }

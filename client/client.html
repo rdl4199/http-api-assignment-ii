@@ -1,169 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
-  <!--<script src="../src/onloadHandler.js"></script>-->
+
 
   <script>
-    const handleResponse = async (response, parseResponse) => {
+  let bg = "";
+  let bgData = "";
+  let name = "";
+  let artist = ""
+  function dragInit() {
+    const dragElements = document.querySelectorAll('.draggable')
+    const cards = document.querySelectorAll('.card')
+    console.log("IT HAPPENED!!")
+    dragElements.forEach(drag => {
+      drag.addEventListener('dragstart', () => {
+        drag.classList.add('dragging')
+        
+      })
+
+      drag.addEventListener('dragend', () => {
+        drag.classList.remove('dragging')
+        console.log("1")
+        if(!drag.classList.contains('searchResult'))
+        {
+            console.log("YEOO")
+           // drag.style.background = ""
+        }
+      })
+    })
+    cards.forEach(card => {
+      card.addEventListener('dragover', e => {
+        e.preventDefault()
+      })
+    })
+    cards.forEach(card => {
+      card.addEventListener("drop", e => {
+        console.log("2")
+        e.preventDefault()
+        let draggable = document.querySelector('.dragging')
+        if(draggable !== null)
+        {
+          bg = e.target.style.background
+          name = e.target.dataset.name
+          artist = e.target.dataset.artist
+          bgData = e.target.dataset.background
+          e.target.style.background = draggable.style.backgroundImage;
+          e.target.dataset.name = draggable.dataset.name;
+          e.target.dataset.artist = draggable.dataset.artist;
+          e.target.dataset.background = draggable.dataset.background;
+          if(draggable.classList.contains("card"))
+          {
+            draggable.style.backgroundImage = bg;
+            draggable.dataset.name = name;
+            draggable.dataset.artist = artist;
+            draggable.dataset.background = bgData
+          } 
+          draggable.classList.remove('dragging')
+        }
+      })
+    })
+  }
+const handleResponse = async (response, parseResponse) => {
     const content = document.querySelector('#content');
 
-    switch (response.status) 
-    {
-    case 200:
+    switch (response.status) {
+      case 200:
         content.innerHTML = `<b>Success</b>`;
         break;
-    case 201:
+      case 201:
         content.innerHTML = `<b>Created</b>`;
         break;
-    case 204:
+      case 204:
         content.innerHTML = `<b>Updated(No Content)</b>`;
         break;
-    case 400:
+      case 400:
         content.innerHTML = `<b>Bad Request</b>`;
         break;
-    case 404:
+      case 404:
         content.innerHTML = `<b>Resource Not Found</b>`;
         break;
-    default:
+      default:
         content.innerHTML = `Error code not implemented by client.`;
         break;
     }
 
-    if(parseResponse)
-    {
-    let obj = await response.json();
+    if (parseResponse) {
+      let obj = await response.json();
+      console.log(obj)
+      let albums = JSON.parse(obj.users["\"joe\""].albums)
+      let jsonString = JSON.stringify(obj);
+      console.log(albums)
+      content.innerHTML += `<p>${jsonString}</p>`;
 
-    let jsonString = JSON.stringify(obj);
+      let cards = document.querySelectorAll(".card");
+      let jsonLoop = 0
+      // for(let x = 0; x < cards.length; x += 3)
+      // {
+      //   cards[x].dataset.name =
+      //   cards[x].dataset.artist
+      //   cards[x].dataset.background
+      // }
 
-    content.innerHTML += `<p>${jsonString}</p>`;
-
-    if(obj.message)
-    {
+      if (obj.message) {
         content.innerHTML = `<p>${obj.id}</p>`;
         content.innerHTML += `<p>${obj.message}</p>`;
+      }
     }
+    else if (response.status == 201 || response.status == 204) {
+      content.innerHTML += `<p>Metadata recieved</p>`;
     }
-    else if(response.status == 201 || response.status == 204)
-    {
-    content.innerHTML += `<p>Metadata recieved</p>`;
+    else if (response.status == 400) {
+      content.innerHTML = `<b>Bad Request</b>`;
     }
-    else if(response.status == 400)
-    {
-    content.innerHTML = `<b>Bad Request</b>`;
+    else {
+      content.innerHTML += `<p>Meta Data Received From Head Request</p>`;
     }
-    else
-    {
-    content.innerHTML += `<p>Meta Data Received From Head Request</p>`;
-    }
-};
+  };
 
-const requestUpdate = async (userForm) => {
-    const url = userForm.querySelector('#urlField').value;
-    const method = userForm.querySelector('#methodSelect').value;
+  const requestUpdate = async () => {
+    const url = '/getTopster';
+    const method = 'get';
 
     let response = await fetch(url, {
-    method, 
-    headers: {
+      method : 'get',
+      headers: {
         'Accept': 'application/json'
-    },
+      },
     });
 
     handleResponse(response, method === 'get')
-};
+  };
 
-//function to send post data back to our server
-const sendPost = async (nameForm) => {
+  //function to send post data back to our server
+  const sendPost = async () => {
     //Grab all the info from the form
-    const nameAction = nameForm.getAttribute('action');
-    const nameMethod = nameForm.getAttribute('method');
+    const cards = document.querySelectorAll(".card");
 
-    const nameField = nameForm.querySelector('#nameField');
-    const ageField = nameForm.querySelector('#ageField');
+    let topsterData = []
+    for(let x = 0; x < cards.length; x++)
+    {
+      topsterData[topsterData.length] = cards[x].dataset.name
+      topsterData[topsterData.length] = cards[x].dataset.artist
+      topsterData[topsterData.length] = cards[x].dataset.background
+    }
 
+    console.log(topsterData)
+   
     //Build a data string in the FORM-URLENCODED format.
-    const formData = `name=${nameField.value}&age=${ageField.value}`;
+    //Shit might be too long
+    const formData = `name="joe"&albums=${JSON.stringify(topsterData)}`;
 
     //Make a fetch request and await a response. Set the method to
     //the one provided by the form (POST). Set the headers. Content-Type
     //is the type of data we are sending. Accept is the data we would like
     //in response. Then add our FORM-URLENCODED string as the body of the request.
-    let response = await fetch(nameAction, {
-    //nameMethod will be post
-    method: nameMethod,
-    headers: {
+    let response = await fetch('/addTopster', {
+      //nameMethod will be post
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-    },
-    //body of this json object
-    body: formData,
+      },
+      //body of this json object
+      body: formData,
     });
 
     //Once we have a response, handle it.
     handleResponse(response);
-};
+  };
 
-async function fmJsonFetch(searchTerm) {
+  async function fmJsonFetch() {
+    let searchTerm = document.querySelector("#albumSearch").value;
     let url = `https://ws.audioscrobbler.com/2.0/?method=album.search&album=${searchTerm}&api_key=9c9b7047bdf5b232701d0f2567bfb81a&format=json`
     let contentString = ""
     fetch(url)
-        .then(response => {
-          if(response.ok) {
-             // console.log(response.json());
-              return response.json();
-          }
-        })
-        .then(json => {
-          console.log(json.results.albummatches.album);
-          
-          for(let x = 0; x < json.results.albummatches.album.length; x++)
-          {
-            contentString += `<div class="searchResult" draggable="true">
-                                <div class="inner" style="background-image: url(${json.results.albummatches.album[x].image[3]['#text']}); width: 130px; height: 130px;">
-                                </div>
-                              </div>`;
-            console.log(json.results.albummatches.album[x].image[3]['#text'])
-          }
-          document.querySelector(".searchContent").innerHTML = contentString;
-        })
-    
-    console.log("Happens");
-}
+      .then(response => {
+        if (response.ok) {
+          // console.log(response.json());
+          return response.json();
+        }
+      })
+      .then(json => {
+        for (let x = 0; x < json.results.albummatches.album.length; x++) {
+          contentString += `<div class="searchResult draggable" draggable="true" 
+          data-name="${json.results.albummatches.album[x].name}" 
+          data-artist="${json.results.albummatches.album[x].artist}" 
+          data-background="${json.results.albummatches.album[x].image[3]['#text']}""
+          style="background-image: url(${json.results.albummatches.album[x].image[3]['#text']}); width: 130px; height: 130px; background-size: contain;
+background-repeat: no-repeat;">
+                            </div>`;
+          console.log(json.results.albummatches.album[x].image[3]['#text'])
+        }
+        document.querySelector(".searchContent").innerHTML = contentString;
+        dragInit()
+      })
+  }
 
-const init = () => {
-    const userForm = document.querySelector('#userForm');
-    const nameForm = document.querySelector('#nameForm');
+  const init = () => {
+
+    document.querySelector("#search").onclick = fmJsonFetch
 
     const getUsers = (e) => {
-    e.preventDefault();
-    requestUpdate(userForm);
-    return false;
+      e.preventDefault();
+      requestUpdate();
+      return false;
     }
 
     const addUser = (e) => {
-    e.preventDefault();
-    sendPost(nameForm);
-    return false;
+      e.preventDefault();
+      sendPost();
+      return false;
     }
 
-    fmJsonFetch("believer")
-    
-    nameForm.addEventListener('submit', addUser);
+    dragInit()
 
-    userForm.addEventListener('submit', getUsers);
-};
+    document.querySelector("#save").onclick = addUser
+    document.querySelector("#recover").onclick = getUsers
+    //<button id="save" class="btn btn-outline-success" type="submit" data-action="/addTopster" data-method="post">Save</button>
+    //<button id="recover" class="btn btn-outline-primary" type="submit" data-action="/getTopster" data-method="get">Recover</button>
+    //nameForm.addEventListener('submit', addUser);
 
-window.onload = init;
+    //userForm.addEventListener('submit', getUsers);
+  };
+
+  window.onload = init;
   </script>
 </head>
+
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">TopChart</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -178,202 +252,210 @@ window.onload = init;
       </div>
     </div>
   </nav>
-  <div class = "container pt-5">
-    <div class = "row">
-      <div class = "col-3">
-        <form class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-primary" type="submit">Search</button>
-        </form>
+  <section id="content">
+  </section>
+  <div class="container pt-5">
+    <div class="row">
+      <div class="col-3">
+        <div class="row">
+          <div class="col-8">
+            <input id="albumSearch" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          </div>
+          <div class="col-4">
+            <button id="search" class="btn btn-outline-primary">Search</button>
+          </div>
+        </div>
         <div class="searchContent">
 
         </div>
       </div>
-      <div class = "col-7">
-        <div class = "row large">
-          <div class="card" draggable="true">
-            <div class="inner">
+      <div class="col-7">
+        <div class="chart">
+          <div class="row large">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
           </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+          <div class="row large">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
           </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+          <div class="row medium">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
           </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+          <div class="row medium">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
           </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+          <div class="row small">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
+            </div>
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
           </div>
-        </div>
-        <div class = "row large">
-          <div class="card" draggable="true">
-            <div class="inner">
+          <div class="row small">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-        </div>
-        <div class = "row medium">
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-        </div>
-        <div class = "row medium">
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-        </div>
-        <div class = "row small">
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-        </div>
-        <div class = "row small">
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
-            </div>
-          </div>
-          <div class="card" draggable="true">
-            <div class="inner">
+            <div class="card draggable" draggable="true">
+              <div class="inner">
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class = "col-2">
-        <button class="btn btn-outline-success" type="submit">Save</button>
-        <button class="btn btn-outline-primary" type="submit">Recover</button>
+      <div class="col-2">
+        <button id="save" class="btn btn-outline-success" type="submit" data-action="/addTopster" data-method="post">Save</button>
+        <button id="recover" class="btn btn-outline-primary" type="submit" data-action="/getTopster" data-method="get">Recover</button>
       </div>
     </div>
   </div>
@@ -401,4 +483,5 @@ window.onload = init;
   <section id="content">
   </section>-->
 </body>
+
 </html>

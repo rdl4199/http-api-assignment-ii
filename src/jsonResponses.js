@@ -50,10 +50,10 @@ const addUser = (request, response, body) => {
     message: 'Fill Out All Required Fields.',
   };
 
-  console.log("Happened");
+  console.log("ADDUSERHAPPEND");
   console.log(body)
   //Check if eiter is not initialized
-  if (!body.name || !body.age) {
+  if (!body.name || !body.albums) {
     responseJSON.id = 'missingParameters';
     return respondJSON(request, response, 400, responseJSON);
   }
@@ -67,7 +67,7 @@ const addUser = (request, response, body) => {
   }
   //change values
   users[body.name].name = body.name;
-  users[body.name].age = body.age;
+  users[body.name].albums = body.albums;
 
   if (responseCode === 201) {
     responseJSON.message = 'Created Successfully';

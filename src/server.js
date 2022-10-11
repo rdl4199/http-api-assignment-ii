@@ -11,8 +11,9 @@ const urlStruct = {
     GET: {
         '/': htmlHandler.getIndex,
         '/style.css': htmlHandler.getCSS,
-        '/onloadHandler.js': htmlHandler.getJS,
-        '/getUsers': jsonHandler.getUsers,
+        '/onloadHandler.js': htmlHandler.getOnload,
+        '/draggable.js': htmlHandler.getDraggable,
+        '/getTopster': jsonHandler.getUsers,
         notFound: jsonHandler.notFound,
     },
     HEAD: {
@@ -20,7 +21,7 @@ const urlStruct = {
         notFound: jsonHandler.notFoundMeta,
     },
     POST: {
-        '/addUser': jsonHandler.parseBody,
+        '/addTopster': jsonHandler.parseBody,
         notFound: jsonHandler.notFoundMeta,
     },
 };
