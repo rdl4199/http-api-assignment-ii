@@ -66,36 +66,11 @@
     })
   }
 const handleResponse = async (response, parseResponse) => {
-    const content = document.querySelector('#content');
 
-    switch (response.status) {
-      case 200:
-        content.innerHTML = `<b>Success</b>`;
-        break;
-      case 201:
-        content.innerHTML = `<b>Created</b>`;
-        break;
-      case 204:
-        content.innerHTML = `<b>Updated(No Content)</b>`;
-        break;
-      case 400:
-        content.innerHTML = `<b>Bad Request</b>`;
-        break;
-      case 404:
-        content.innerHTML = `<b>Resource Not Found</b>`;
-        break;
-      default:
-        content.innerHTML = `Error code not implemented by client.`;
-        break;
-    }
-
+    //Handles get request and puts the users topster on screen
     if (parseResponse) {
       let obj = await response.json();
-      console.log(obj)
       let albums = JSON.parse(obj.users[`\"${document.querySelector("#login").dataset.user}\"`].albums)
-      let jsonString = JSON.stringify(obj);
-      console.log(albums)
-      content.innerHTML += `<p>${jsonString}</p>`;
 
       let cards = document.querySelectorAll(".card");
       let jsonLoop = 0
@@ -118,23 +93,17 @@ const handleResponse = async (response, parseResponse) => {
         jsonLoop++;
         
       }
-
-      if (obj.message) {
-        content.innerHTML = `<p>${obj.id}</p>`;
-        content.innerHTML += `<p>${obj.message}</p>`;
-      }
     }
+    //This is were toast notifications would also appear when I get them working.
     else if (response.status == 201 || response.status == 204) {
-      content.innerHTML += `<p>Metadata recieved</p>`;
     }
     else if (response.status == 400) {
-      content.innerHTML = `<b>Bad Request</b>`;
     }
     else {
-      content.innerHTML += `<p>Meta Data Received From Head Request</p>`;
     }
   };
 
+  //Gets the topster chart
   const requestUpdate = async () => {
     const url = '/getTopster';
     const method = 'get';
@@ -162,8 +131,7 @@ const handleResponse = async (response, parseResponse) => {
       topsterData[topsterData.length] = cards[x].dataset.background
     }
 
-    console.log(topsterData)
-   
+    //API ASSIGNMENT 2 WORK
     //Build a data string in the FORM-URLENCODED format.
     //Shit might be too long
     const formData = `name="${document.querySelector("#login").dataset.user}"&albums=${JSON.stringify(topsterData)}`;
