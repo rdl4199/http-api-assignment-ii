@@ -62,3 +62,16 @@ html, body {
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+.searchContent
+{
+  border: 10px black;
+  overflow: hidden;
+  overflow-y: scroll;
+  height: 30rem;
+  margin-left: 1rem !important;
+}
+
+#login {
+  float: right;
+}

@@ -92,19 +92,32 @@ const handleResponse = async (response, parseResponse) => {
     if (parseResponse) {
       let obj = await response.json();
       console.log(obj)
-      let albums = JSON.parse(obj.users["\"joe\""].albums)
+      let albums = JSON.parse(obj.users[`\"${document.querySelector("#login").dataset.user}\"`].albums)
       let jsonString = JSON.stringify(obj);
       console.log(albums)
       content.innerHTML += `<p>${jsonString}</p>`;
 
       let cards = document.querySelectorAll(".card");
       let jsonLoop = 0
-      // for(let x = 0; x < cards.length; x += 3)
-      // {
-      //   cards[x].dataset.name =
-      //   cards[x].dataset.artist
-      //   cards[x].dataset.background
-      // }
+      for(let x = 0; x < cards.length; x++)
+      {
+        cards[x].dataset.name = albums[jsonLoop]
+        jsonLoop++;
+        cards[x].dataset.artist = albums[jsonLoop]
+        jsonLoop++;
+        cards[x].dataset.background = albums[jsonLoop]
+        if(albums[jsonLoop] !== null)
+        {
+          cards[x].style.backgroundImage = `url(${albums[jsonLoop]})`
+        }
+        else
+        {
+          console.log("What");
+          cards[x].style.backgroundImage = albums[jsonLoop]
+        }
+        jsonLoop++;
+        
+      }
 
       if (obj.message) {
         content.innerHTML = `<p>${obj.id}</p>`;
@@ -153,7 +166,7 @@ const handleResponse = async (response, parseResponse) => {
    
     //Build a data string in the FORM-URLENCODED format.
     //Shit might be too long
-    const formData = `name="joe"&albums=${JSON.stringify(topsterData)}`;
+    const formData = `name="${document.querySelector("#login").dataset.user}"&albums=${JSON.stringify(topsterData)}`;
 
     //Make a fetch request and await a response. Set the method to
     //the one provided by the form (POST). Set the headers. Content-Type
@@ -174,6 +187,11 @@ const handleResponse = async (response, parseResponse) => {
     handleResponse(response);
   };
 
+  function loginUser() {
+    document.querySelector("#login").dataset.user = document.querySelector("#username").value;
+    document.querySelector("#login").innerHTML = `${document.querySelector("#username").value}`
+  }
+
   async function fmJsonFetch() {
     let searchTerm = document.querySelector("#albumSearch").value;
     let url = `https://ws.audioscrobbler.com/2.0/?method=album.search&album=${searchTerm}&api_key=9c9b7047bdf5b232701d0f2567bfb81a&format=json`
@@ -187,7 +205,7 @@ const handleResponse = async (response, parseResponse) => {
       })
       .then(json => {
         for (let x = 0; x < json.results.albummatches.album.length; x++) {
-          contentString += `<div class="searchResult draggable" draggable="true" 
+          contentString += `<div class="searchResult draggable col-6" draggable="true" 
           data-name="${json.results.albummatches.album[x].name}" 
           data-artist="${json.results.albummatches.album[x].artist}" 
           data-background="${json.results.albummatches.album[x].image[3]['#text']}""
@@ -204,7 +222,7 @@ background-repeat: no-repeat;">
   const init = () => {
 
     document.querySelector("#search").onclick = fmJsonFetch
-
+    document.querySelector("#loginBtn").onclick = loginUser
     const getUsers = (e) => {
       e.preventDefault();
       requestUpdate();
@@ -246,14 +264,12 @@ background-repeat: no-repeat;">
             <a class="nav-link active" aria-current="page" href="#">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Latest Charts</a>
+            <button id="login" data-user="default" class="btn btn-outline-light d-flex" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-  <section id="content">
-  </section>
   <div class="container pt-5">
     <div class="row">
       <div class="col-3">
@@ -265,7 +281,7 @@ background-repeat: no-repeat;">
             <button id="search" class="btn btn-outline-primary">Search</button>
           </div>
         </div>
-        <div class="searchContent">
+        <div class="searchContent row">
 
         </div>
       </div>
@@ -455,33 +471,30 @@ background-repeat: no-repeat;">
       </div>
       <div class="col-2">
         <button id="save" class="btn btn-outline-success" type="submit" data-action="/addTopster" data-method="post">Save</button>
+        
         <button id="recover" class="btn btn-outline-primary" type="submit" data-action="/getTopster" data-method="get">Recover</button>
       </div>
     </div>
   </div>
-  <!--<section id="top">
-    <h3>POST Status Code Tests</h3>
-    <form id="nameForm" action="/addUser" method="post">
-      <label for="name">Name: </label>
-      <input id="nameField" type="text" name="name" />
-      <label for="age">Age: </label>
-      <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
-      <input type="submit" value="Add User" />
-    </form>
-    <form id="userForm" action="/getUsers" method="get">
-      <select id='urlField'>
-        <option value='/getUsers'>/getUsers</option>
-        <option value='/notReal'>/notReal</option>
-      </select>
-      <select id="methodSelect">
-        <option value="get">GET</option>
-        <option value="head">HEAD</option>
-      </select>
-      <input type="submit" value="Get User" />
-    </form>
-  </section>
-  <section id="content">
-  </section>-->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="loginModalLabel">Login</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Username:</p>
+          <input id="username" class="form-control me-2" type="search" placeholder="username" aria-label="username">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="loginBtn" type="button" class="btn btn-primary">Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>
